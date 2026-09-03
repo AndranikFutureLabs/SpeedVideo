@@ -1,0 +1,21 @@
+appId: ru.andranikfuturelabs.skorostvideo
+productName: СкоростьВидео
+copyright: Copyright © 2026 AndranikFutureLabs
+directories:
+  output: release
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - node_modules/**/*
+  - package.json
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: resources/icon.png
+  legalTrademarks: AndranikFutureLabs
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  uninstallDisplayName: СкоростьВидео
