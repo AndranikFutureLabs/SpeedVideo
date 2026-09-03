@@ -1,9 +1,10 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, protocol, net } from 'electron'
 import { join } from 'path'
 import { spawn } from 'child_process'
 import ffmpegPath from 'ffmpeg-static'
 import ffprobePath from 'ffprobe-static'
 import { existsSync, mkdirSync } from 'fs'
+import { pathToFileURL } from 'url'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -13,12 +14,13 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'СкоростьВидео',
+    title: 'SpeedVideo',
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
+      webSecurity: false, // Allow file:// video playback
     },
   })
 
@@ -43,6 +45,11 @@ ipcMain.handle('dialog:openVideo', async () => {
   })
   if (result.canceled || result.filePaths.length === 0) return null
   return result.filePaths[0]
+})
+
+// --- IPC: Get video URL for playback ---
+ipcMain.handle('video:getUrl', async (_event, filePath: string) => {
+  return pathToFileURL(filePath).href
 })
 
 // --- IPC: Select save location ---

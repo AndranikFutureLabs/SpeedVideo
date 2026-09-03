@@ -129,6 +129,7 @@ declare global {
   interface Window {
     api: {
       openVideo: () => Promise<string | null>
+      getVideoUrl: (filePath: string) => Promise<string>
       saveVideo: (defaultName: string) => Promise<string | null>
       probeVideo: (filePath: string) => Promise<{ duration: number }>
       renderVideo: (inputPath: string, outputPath: string, speedPct: number) => Promise<{ success: boolean; outputPath: string }>
@@ -143,7 +144,9 @@ async function selectVideo() {
   const path = await window.api.openVideo()
   if (!path) return
   videoPath.value = path
-  videoUrl.value = `file://${path}`
+  // Get proper file:// URL via main process (handles Windows paths)
+  const url = await window.api.getVideoUrl(path)
+  videoUrl.value = url
   speedPct.value = 100
   renderResult.value = null
   renderProgressSec.value = 0

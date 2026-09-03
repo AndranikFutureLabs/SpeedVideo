@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('api', {
   openVideo: () => ipcRenderer.invoke('dialog:openVideo'),
+  getVideoUrl: (filePath: string) => ipcRenderer.invoke('video:getUrl', filePath),
   saveVideo: (defaultName: string) => ipcRenderer.invoke('dialog:saveVideo', defaultName),
   probeVideo: (filePath: string) => ipcRenderer.invoke('video:probe', filePath),
   renderVideo: (inputPath: string, outputPath: string, speedPct: number) =>
