@@ -30,10 +30,13 @@ mac:
   hardenedRuntime: false
 dmg:
   contents:
-    - position: 0,0
+    - x: 130
+      y: 120
       path: /Applications
-    - position: 200,0
+    - x: 410
+      y: 120
       path: СкоростьВидео.app
+      type: link
 
 linux:
   target:
@@ -42,5 +45,4 @@ linux:
   icon: resources/icon.png
   category: AudioVideo
   maintainer: AndranikFutureLabs
-AppImage:
   artifactName: ${productName}-${version}-${arch}.${ext}
