@@ -8,6 +8,7 @@ files:
   - dist-electron/**/*
   - node_modules/**/*
   - package.json
+
 win:
   target:
     - target: nsis
@@ -19,3 +20,27 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   uninstallDisplayName: СкоростьВидео
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: resources/icon.png
+  category: public.app-category.video
+  hardenedRuntime: false
+dmg:
+  contents:
+    - position: 0,0
+      path: /Applications
+    - position: 200,0
+      path: СкоростьВидео.app
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+  icon: resources/icon.png
+  category: AudioVideo
+  maintainer: AndranikFutureLabs
+AppImage:
+  artifactName: ${productName}-${version}-${arch}.${ext}

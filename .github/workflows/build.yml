@@ -1,0 +1,163 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+            arch: x64
+            artifact_name: СкоростьВидео Setup
+            artifact_ext: exe
+          - os: macos-13
+            platform: mac
+            arch: x64
+            artifact_name: СкоростьВideo
+            artifact_ext: dmg
+          - os: macos-14
+            platform: mac-arm
+            arch: arm64
+            artifact_name: СкоростьВideo-arm
+            artifact_ext: dmg
+          - os: ubuntu-22.04
+            platform: linux
+            arch: x64
+            artifact_name: СкоростьВидео
+            artifact_ext: AppImage
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install esbuild
+        run: npm install esbuild
+
+      - name: Build Electron main/preload
+        run: node build-electron.mjs
+
+      - name: Build Vue frontend
+        run: node node_modules/vite/bin/vite.js build
+
+      # ── Windows ──
+      - name: Build Windows NSIS
+        if: matrix.platform == 'win'
+        run: node node_modules/electron-builder/cli.js --win --x64
+
+      # ── macOS Intel ──
+      - name: Build macOS (Intel)
+        if: matrix.platform == 'mac'
+        run: node node_modules/electron-builder/cli.js --mac --x64
+
+      # ── macOS ARM ──
+      - name: Build macOS (ARM)
+        if: matrix.platform == 'mac-arm'
+        run: node node_modules/electron-builder/cli.js --mac --arm64
+
+      # ── Linux ──
+      - name: Build Linux AppImage
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools zsync
+          node node_modules/electron-builder/cli.js --linux --x64
+
+      # ── Upload artifacts ──
+      - name: Upload Windows artifact
+        if: matrix.platform == 'win'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SkorostVideo-Windows-x64
+          path: |
+            release/*.exe
+            release/*.yml
+
+      - name: Upload macOS Intel artifact
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SkorostVideo-macOS-Intel
+          path: |
+            release/*.dmg
+            release/*.yml
+
+      - name: Upload macOS ARM artifact
+        if: matrix.platform == 'mac-arm'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SkorostVideo-macOS-ARM
+          path: |
+            release/*.dmg
+            release/*.yml
+
+      - name: Upload Linux artifact
+        if: matrix.platform == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SkorostVideo-Linux-x64
+          path: |
+            release/*.AppImage
+            release/*.yml
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure
+        run: find artifacts -type f
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: СкоростьВидео ${{ github.ref_name }}
+          body: |
+            ## 🎬 СкоростьВидео ${{ github.ref_name }}
+            
+            Приложение для настройки и сохранения скорости воспроизведения видео.
+            
+            ### Возможности:
+            - Загрузка видео (MP4, AVI, MKV, MOV, WebM, FLV, WMV)
+            - Настройка скорости 10%-300% слайдером, пресетами и скролом
+            - Предпросмотр на лету
+            - Сохранение видео с физически изменённой скоростью через FFmpeg
+            
+            ### Установка:
+            - **Windows**: Запустите `.exe` установщик
+            - **macOS Intel**: Откройте `.dmg` (Intel)
+            - **macOS ARM**: Откройте `.dmg` (Apple Silicon)
+            - **Linux**: Запустите `.AppImage` (chmod +x && ./file.AppImage)
+            
+            > ⚠️ Windows SmartScreen: нажмите "Подробнее" → "Выполнить в любом случае"
+          files: |
+            artifacts/SkorostVideo-Windows-x64/*.exe
+            artifacts/SkorostVideo-macOS-Intel/*.dmg
+            artifacts/SkorostVideo-macOS-ARM/*.dmg
+            artifacts/SkorostVideo-Linux-x64/*.AppImage
+          draft: false
+          prerelease: false
