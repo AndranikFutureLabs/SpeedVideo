@@ -71,36 +71,34 @@ jobs:
           sudo apt-get install -y libarchive-tools zsync
           node node_modules/electron-builder/cli.js --linux --x64 --publish never
 
-      # ── Collect built files ──
-      - name: Collect Windows files
-        if: matrix.platform == 'win'
+      # ── Collect built files (cross-platform Node.js) ──
+      - name: Collect built files
+        shell: node
         run: |
-          mkdir -p release-files
-          cp release/*.exe release-files/ 2>/dev/null || true
-      - name: Collect macOS Intel files
-        if: matrix.platform == 'mac'
-        run: |
-          mkdir -p release-files
-          cp release/*.dmg release-files/ 2>/dev/null || true
-      - name: Collect macOS ARM files
-        if: matrix.platform == 'mac-arm'
-        run: |
-          mkdir -p release-files
-          cp release/*.dmg release-files/ 2>/dev/null || true
-      - name: Collect Linux files
-        if: matrix.platform == 'linux'
-        run: |
-          mkdir -p release-files
-          cp release/*.AppImage release-files/ 2>/dev/null || true
+          const fs = require('fs');
+          const path = require('path');
+          fs.mkdirSync('release-files', { recursive: true });
+          if (fs.existsSync('release')) {
+            for (const f of fs.readdirSync('release')) {
+              const ext = path.extname(f).toLowerCase();
+              if (['.exe', '.dmg', '.appimage', '.yml'].includes(ext)) {
+                fs.copyFileSync(path.join('release', f), path.join('release-files', f));
+                console.log('Collected:', f);
+              }
+            }
+          }
+          if (fs.readdirSync('release-files').length === 0) {
+            console.log('WARNING: No files collected!');
+          }
 
-      # ── Upload to GitHub Release directly (no artifact storage) ──
+      # ── Upload to GitHub Release directly ──
       - name: Upload to Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          name: СкоростьВидео ${{ github.ref_name }}
+          name: SpeedVideo ${{ github.ref_name }}
           body: |
-            ## 🎬 СкоростьВидео ${{ github.ref_name }}
+            ## 🎬 SpeedVideo ${{ github.ref_name }}
             
             Приложение для настройки и сохранения скорости воспроизведения видео.
             
@@ -114,9 +112,9 @@ jobs:
             - **Windows**: Запустите `.exe` установщик
             - **macOS Intel**: Откройте `.dmg` (Intel)
             - **macOS ARM**: Откройте `.dmg` (Apple Silicon)
-            - **Linux**: Запустите `.AppImage` (chmod +x && ./file.AppImage)
+            - **Linux**: Запустите `.AppImage` (`chmod +x && ./file.AppImage`)
             
-            > ⚠️ Windows SmartScreen: нажмите "Подробнее" → "Выполнить в любом случае"
+            > ⚠️ Windows SmartScreen: "Подробнее" → "Выполнить в любом случае"
           files: |
             release-files/*
           draft: false
