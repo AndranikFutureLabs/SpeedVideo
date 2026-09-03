@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -68,64 +71,31 @@ jobs:
           sudo apt-get install -y libarchive-tools zsync
           node node_modules/electron-builder/cli.js --linux --x64 --publish never
 
-      # ── Upload artifacts ──
-      - name: Upload Windows artifact
+      # ── Collect built files ──
+      - name: Collect Windows files
         if: matrix.platform == 'win'
-        uses: actions/upload-artifact@v4
-        with:
-          name: SkorostVideo-Windows-x64
-          path: |
-            release/*.exe
-            release/*.yml
-          if-no-files-found: warn
-
-      - name: Upload macOS Intel artifact
+        run: |
+          mkdir -p release-files
+          cp release/*.exe release-files/ 2>/dev/null || true
+      - name: Collect macOS Intel files
         if: matrix.platform == 'mac'
-        uses: actions/upload-artifact@v4
-        with:
-          name: SkorostVideo-macOS-Intel
-          path: |
-            release/*.dmg
-            release/*.yml
-          if-no-files-found: warn
-
-      - name: Upload macOS ARM artifact
+        run: |
+          mkdir -p release-files
+          cp release/*.dmg release-files/ 2>/dev/null || true
+      - name: Collect macOS ARM files
         if: matrix.platform == 'mac-arm'
-        uses: actions/upload-artifact@v4
-        with:
-          name: SkorostVideo-macOS-ARM
-          path: |
-            release/*.dmg
-            release/*.yml
-          if-no-files-found: warn
-
-      - name: Upload Linux artifact
+        run: |
+          mkdir -p release-files
+          cp release/*.dmg release-files/ 2>/dev/null || true
+      - name: Collect Linux files
         if: matrix.platform == 'linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: SkorostVideo-Linux-x64
-          path: |
-            release/*.AppImage
-            release/*.yml
-          if-no-files-found: warn
+        run: |
+          mkdir -p release-files
+          cp release/*.AppImage release-files/ 2>/dev/null || true
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Display structure
-        run: find artifacts -type f
-
-      - name: Create GitHub Release
+      # ── Upload to GitHub Release directly (no artifact storage) ──
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           name: СкоростьВидео ${{ github.ref_name }}
@@ -148,9 +118,6 @@ jobs:
             
             > ⚠️ Windows SmartScreen: нажмите "Подробнее" → "Выполнить в любом случае"
           files: |
-            artifacts/SkorostVideo-Windows-x64/*
-            artifacts/SkorostVideo-macOS-Intel/*
-            artifacts/SkorostVideo-macOS-ARM/*
-            artifacts/SkorostVideo-Linux-x64/*
+            release-files/*
           draft: false
           prerelease: false
