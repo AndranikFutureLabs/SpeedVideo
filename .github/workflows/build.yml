@@ -16,23 +16,15 @@ jobs:
           - os: windows-latest
             platform: win
             arch: x64
-            artifact_name: СкоростьВидео Setup
-            artifact_ext: exe
           - os: macos-13
             platform: mac
             arch: x64
-            artifact_name: СкоростьВideo
-            artifact_ext: dmg
           - os: macos-14
             platform: mac-arm
             arch: arm64
-            artifact_name: СкоростьВideo-arm
-            artifact_ext: dmg
           - os: ubuntu-22.04
             platform: linux
             arch: x64
-            artifact_name: СкоростьВидео
-            artifact_ext: AppImage
 
     steps:
       - name: Checkout
@@ -47,9 +39,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install esbuild
-        run: npm install esbuild
-
       - name: Build Electron main/preload
         run: node build-electron.mjs
 
@@ -59,25 +48,25 @@ jobs:
       # ── Windows ──
       - name: Build Windows NSIS
         if: matrix.platform == 'win'
-        run: node node_modules/electron-builder/cli.js --win --x64
+        run: node node_modules/electron-builder/cli.js --win --x64 --publish never
 
       # ── macOS Intel ──
       - name: Build macOS (Intel)
         if: matrix.platform == 'mac'
-        run: node node_modules/electron-builder/cli.js --mac --x64
+        run: node node_modules/electron-builder/cli.js --mac --x64 --publish never
 
       # ── macOS ARM ──
       - name: Build macOS (ARM)
         if: matrix.platform == 'mac-arm'
-        run: node node_modules/electron-builder/cli.js --mac --arm64
+        run: node node_modules/electron-builder/cli.js --mac --arm64 --publish never
 
       # ── Linux ──
       - name: Build Linux AppImage
         if: matrix.platform == 'linux'
         run: |
-          sudo apt-get update
+          sudo apt-get update -y
           sudo apt-get install -y libarchive-tools zsync
-          node node_modules/electron-builder/cli.js --linux --x64
+          node node_modules/electron-builder/cli.js --linux --x64 --publish never
 
       # ── Upload artifacts ──
       - name: Upload Windows artifact
@@ -88,6 +77,7 @@ jobs:
           path: |
             release/*.exe
             release/*.yml
+          if-no-files-found: warn
 
       - name: Upload macOS Intel artifact
         if: matrix.platform == 'mac'
@@ -97,6 +87,7 @@ jobs:
           path: |
             release/*.dmg
             release/*.yml
+          if-no-files-found: warn
 
       - name: Upload macOS ARM artifact
         if: matrix.platform == 'mac-arm'
@@ -106,6 +97,7 @@ jobs:
           path: |
             release/*.dmg
             release/*.yml
+          if-no-files-found: warn
 
       - name: Upload Linux artifact
         if: matrix.platform == 'linux'
@@ -115,6 +107,7 @@ jobs:
           path: |
             release/*.AppImage
             release/*.yml
+          if-no-files-found: warn
 
   release:
     needs: build
@@ -155,9 +148,9 @@ jobs:
             
             > ⚠️ Windows SmartScreen: нажмите "Подробнее" → "Выполнить в любом случае"
           files: |
-            artifacts/SkorostVideo-Windows-x64/*.exe
-            artifacts/SkorostVideo-macOS-Intel/*.dmg
-            artifacts/SkorostVideo-macOS-ARM/*.dmg
-            artifacts/SkorostVideo-Linux-x64/*.AppImage
+            artifacts/SkorostVideo-Windows-x64/*
+            artifacts/SkorostVideo-macOS-Intel/*
+            artifacts/SkorostVideo-macOS-ARM/*
+            artifacts/SkorostVideo-Linux-x64/*
           draft: false
           prerelease: false
