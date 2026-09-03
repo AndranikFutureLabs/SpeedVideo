@@ -71,25 +71,13 @@ jobs:
           sudo apt-get install -y libarchive-tools zsync
           node node_modules/electron-builder/cli.js --linux --x64 --publish never
 
-      # ── Collect built files (cross-platform Node.js) ──
+      # ── Collect built files (cross-platform via bash) ──
       - name: Collect built files
-        shell: node
+        shell: bash
         run: |
-          const fs = require('fs');
-          const path = require('path');
-          fs.mkdirSync('release-files', { recursive: true });
-          if (fs.existsSync('release')) {
-            for (const f of fs.readdirSync('release')) {
-              const ext = path.extname(f).toLowerCase();
-              if (['.exe', '.dmg', '.appimage', '.yml'].includes(ext)) {
-                fs.copyFileSync(path.join('release', f), path.join('release-files', f));
-                console.log('Collected:', f);
-              }
-            }
-          }
-          if (fs.readdirSync('release-files').length === 0) {
-            console.log('WARNING: No files collected!');
-          }
+          mkdir -p release-files
+          find release -maxdepth 1 -type f \( -name '*.exe' -o -name '*.dmg' -o -name '*.AppImage' -o -name '*.yml' \) -exec cp {} release-files/ \; 2>/dev/null || true
+          ls -la release-files/ || true
 
       # ── Upload to GitHub Release directly ──
       - name: Upload to Release
