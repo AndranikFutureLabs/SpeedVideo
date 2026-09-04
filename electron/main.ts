@@ -25,9 +25,9 @@ function createWindow() {
   })
 
   // Dev: load from Vite dev server; Prod: load from built files
-  const isDev = !!process.env.VITE_DEV_SERVER_URL
-  if (isDev) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
+  const devUrl = process.env.VITE_DEV_SERVER_URL
+  if (devUrl) {
+    mainWindow.loadURL(devUrl)
     mainWindow.webContents.openDevTools()
   } else {
     mainWindow.loadFile(join(__dirname, '../dist/index.html'))
