@@ -9,6 +9,9 @@ files:
   - dist-electron/**/*
   - node_modules/**/*
   - package.json
+asarUnpack:
+  - node_modules/ffmpeg-static/**
+  - node_modules/ffprobe-static/**
 
 win:
   target:
@@ -36,7 +39,7 @@ dmg:
       path: /Applications
     - x: 410
       y: 120
-      path: СкоростьВидео.app
+      path: SpeedVideo.app
       type: link
 
 linux:
