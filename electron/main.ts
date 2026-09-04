@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, protocol, net } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, protocol, net, shell } from 'electron'
 import { join } from 'path'
 import { spawn } from 'child_process'
 import ffmpegPath from 'ffmpeg-static'
@@ -50,6 +50,11 @@ ipcMain.handle('dialog:openVideo', async () => {
 // --- IPC: Get video URL for playback ---
 ipcMain.handle('video:getUrl', async (_event, filePath: string) => {
   return pathToFileURL(filePath).href
+})
+
+// --- IPC: Open external link ---
+ipcMain.handle('shell:openExternal', async (_event, url: string) => {
+  await shell.openExternal(url)
 })
 
 // --- IPC: Select save location ---

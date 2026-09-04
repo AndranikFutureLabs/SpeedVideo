@@ -3,8 +3,29 @@
     <!-- Header -->
     <header class="header">
       <h1>🎬 СкоростьВидео</h1>
-      <span class="version">v1.0.0</span>
+      <span class="version">v1.0.2</span>
+      <button class="about-btn" @click="showAbout = true">ℹ</button>
     </header>
+
+    <!-- About dialog -->
+    <div v-if="showAbout" class="about-overlay" @click.self="showAbout = false">
+      <div class="about-dialog">
+        <div class="about-logo">🎬</div>
+        <h2 class="about-title">СкоростьВидео V1</h2>
+        <p class="about-subtitle">сохранение видео с другой выбранной скоростью</p>
+        <hr class="about-divider" />
+        <div class="about-info">
+          <p><span class="about-label">Разработчик:</span> Андраник Алавердян (AndranikFutureLabs)</p>
+          <p><span class="about-label">Поддержка:</span> @AndranikFutureLabs</p>
+          <p><span class="about-label">Канал:</span> @AndranikFutureLabsChannel</p>
+          <p><span class="about-label">Сайт:</span> <a href="https://andranik-future-labs.ru" @click.prevent="openLink">andranik-future-labs.ru</a></p>
+          <p><span class="about-label">GitHub:</span> <a href="https://github.com/AndranikFutureLabs/SpeedVideo" @click.prevent="openLink">github.com/AndranikFutureLabs/SpeedVideo</a></p>
+        </div>
+        <hr class="about-divider" />
+        <p class="about-copy">© 2026 AndranikFutureLabs</p>
+        <button class="about-close" @click="showAbout = false">Закрыть</button>
+      </div>
+    </div>
 
     <!-- No video loaded -->
     <div v-if="!videoPath" class="drop-zone" @click="selectVideo">
@@ -100,6 +121,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+const showAbout = ref(false)
 const videoPath = ref<string | null>(null)
 const videoUrl = ref<string>('')
 const videoEl = ref<HTMLVideoElement | null>(null)
@@ -130,6 +152,7 @@ declare global {
     api: {
       openVideo: () => Promise<string | null>
       getVideoUrl: (filePath: string) => Promise<string>
+      openExternal: (url: string) => Promise<void>
       saveVideo: (defaultName: string) => Promise<string | null>
       probeVideo: (filePath: string) => Promise<{ duration: number }>
       renderVideo: (inputPath: string, outputPath: string, speedPct: number) => Promise<{ success: boolean; outputPath: string }>
@@ -137,6 +160,12 @@ declare global {
       onRenderProgress: (callback: (sec: number) => void) => void
     }
   }
+}
+
+function openLink(e: MouseEvent) {
+  e.preventDefault()
+  const href = (e.currentTarget as HTMLAnchorElement).href
+  if (href) window.api.openExternal(href)
 }
 
 // --- Select video ---
@@ -478,5 +507,105 @@ async function saveVideo() {
   background: #ff444422;
   border-color: #ff444444;
   color: #ff6666;
+}
+
+/* About dialog */
+.about-btn {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #333;
+  background: #161628;
+  color: #0be0b8;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.about-btn:hover {
+  border-color: #0be0b8;
+  box-shadow: 0 0 8px #0be0b844;
+}
+.about-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.about-dialog {
+  background: #1a1a2e;
+  border: 1px solid #0be0b844;
+  border-radius: 16px;
+  padding: 32px 40px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 40px #0be0b822;
+}
+.about-logo {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.about-title {
+  font-size: 24px;
+  color: #0be0b8;
+  margin: 0 0 4px 0;
+}
+.about-subtitle {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 20px 0;
+}
+.about-divider {
+  border: none;
+  border-top: 1px solid #222;
+  margin: 16px 0;
+}
+.about-info {
+  text-align: left;
+  font-size: 14px;
+  line-height: 2;
+  color: #ccc;
+}
+.about-info p {
+  margin: 0;
+}
+.about-label {
+  color: #666;
+  display: inline-block;
+  width: 110px;
+}
+.about-info a {
+  color: #0be0b8;
+  text-decoration: none;
+}
+.about-info a:hover {
+  text-decoration: underline;
+}
+.about-copy {
+  font-size: 12px;
+  color: #555;
+  margin: 8px 0 16px 0;
+}
+.about-close {
+  padding: 10px 32px;
+  border: none;
+  background: #0be0b8;
+  color: #1a1a2e;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.about-close:hover {
+  background: #0bd0a8;
+  box-shadow: 0 0 12px #0be0b866;
 }
 </style>
