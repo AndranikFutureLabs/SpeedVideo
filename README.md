@@ -35,6 +35,13 @@
 
 [Релизы](https://github.com/AndranikFutureLabs/SpeedVideo/releases)
 
-## Версия: 1.0.4
+## Контакты
+
+- **Поддержка:** [@AndranikFutureLabs](https://t.me/AndranikFutureLabs)
+- **Канал:** [@AndranikFutureLabsChannel](https://t.me/AndranikFutureLabsChannel)
+- **Сайт:** [andranik-future-labs.ru](https://andranik-future-labs.ru)
+- **GitHub:** [AndranikFutureLabs/SpeedVideo](https://github.com/AndranikFutureLabs/SpeedVideo)
+
+## Версия: 1.0.5
 
 © 2026 AndranikFutureLabs
