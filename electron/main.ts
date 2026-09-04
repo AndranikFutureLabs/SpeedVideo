@@ -1,10 +1,23 @@
 import { app, BrowserWindow, ipcMain, dialog, protocol, net, shell } from 'electron'
-import { join } from 'path'
+import { join, dirname } from 'path'
 import { spawn } from 'child_process'
 import ffmpegPath from 'ffmpeg-static'
 import ffprobePath from 'ffprobe-static'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, realpathSync } from 'fs'
 import { pathToFileURL } from 'url'
+
+// --- Resolve real paths for binaries (asar → asar.unpacked) ---
+function resolveBinaryPath(p: string | null | undefined): string {
+  if (!p) return ''
+  // Replace app.asar with app.asar.unpacked — spawn() can't read inside asar
+  if (p.includes('app.asar')) {
+    return p.replace('app.asar', 'app.asar.unpacked')
+  }
+  return p
+}
+
+const ffmpegBin = resolveBinaryPath(ffmpegPath as unknown as string)
+const ffprobeBin = resolveBinaryPath(ffprobePath?.path as string | undefined)
 
 let mainWindow: BrowserWindow | null = null
 
@@ -71,7 +84,7 @@ ipcMain.handle('dialog:saveVideo', async (_event, defaultName: string) => {
 // --- IPC: Probe video duration ---
 ipcMain.handle('video:probe', async (_event, filePath: string) => {
   return new Promise((resolve, reject) => {
-    const ffprobe = ffprobePath.path
+    const ffprobe = ffprobeBin
     const proc = spawn(ffprobe, [
       '-v', 'error',
       '-show_entries', 'format=duration',
@@ -135,7 +148,7 @@ ipcMain.handle('video:render', async (event, inputPath: string, outputPath: stri
   )
 
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath as string, args)
+    const proc = spawn(ffmpegBin, args)
     let stderr = ''
 
     proc.stderr.on('data', (d) => {
@@ -166,7 +179,7 @@ ipcMain.handle('video:render', async (event, inputPath: string, outputPath: stri
 
 // --- IPC: Get ffmpeg path (for debugging) ---
 ipcMain.handle('ffmpeg:path', () => {
-  return { ffmpeg: ffmpegPath, ffprobe: ffprobePath?.path }
+  return { ffmpeg: ffmpegBin, ffprobe: ffprobeBin }
 })
 
 // --- Build atempo chain for audio speed ---
