@@ -1,6 +1,6 @@
 {
   "name": "skorost-video",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Приложение для настройки и сохранения скорости воспроизведения видео",
   "author": "AndranikFutureLabs",
   "main": "dist-electron/main.cjs",

@@ -1,6 +1,7 @@
 appId: ru.andranikfuturelabs.skorostvideo
-productName: СкоростьВидео
+productName: SpeedVideo
 copyright: Copyright © 2026 AndranikFutureLabs
+artifactName: ${productName}-${version}-${platform}-${arch}.${ext}
 directories:
   output: release
 files:
@@ -19,7 +20,7 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
-  uninstallDisplayName: СкоростьВидео
+  uninstallDisplayName: SpeedVideo
 
 mac:
   target:
