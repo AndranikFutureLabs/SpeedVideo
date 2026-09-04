@@ -1,3 +1,5 @@
+![SpeedVideo](resources/icon.png)
+
 # 🎬 СкоростьВидео
 
 Приложение для настройки и сохранения скорости воспроизведения видео.
@@ -29,23 +31,10 @@
 - FFmpeg (ffmpeg-static) для рендеринга
 - esbuild для сборки main/preload
 
-## Сборка из исходников
+## Скачать
 
-```bash
-npm install
-npm run build
-npm run electron:dev    # запуск в dev режиме
-npm run electron:build   # сборка NSIS установщика
-```
+[Релизы](https://github.com/AndranikFutureLabs/SpeedVideo/releases)
 
-## CI/CD
-
-GitHub Actions собирает релизы для всех платформ при пуше тега `v*`:
-- Windows: NSIS `.exe` установщик
-- macOS Intel: `.dmg`
-- macOS ARM (Apple Silicon): `.dmg`
-- Linux: `.AppImage`
-
-## Версия: 1.0.0
+## Версия: 1.0.4
 
 © 2026 AndranikFutureLabs
